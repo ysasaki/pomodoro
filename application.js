@@ -1,18 +1,6 @@
 var App = window.App = Ember.Application.create();
 
 App.PomodoroController = Ember.Controller.extend({
-  timeLeftMin: Ember.computed(function() {
-    return Math.floor(this.get('content.timeLeft') / 60 / 1000);
-  }).property('content.timeLeft'),
-
-  maxMin: Ember.computed(function() {
-    return Math.floor(this.get('content.max') / 60 / 1000);
-  }).property('content.max'),
-
-  passedTimeSec: Ember.computed(function() {
-    return Math.floor(this.get('content.passedTime') / 1000);
-  }).property('content.passedTime'),
-
   start: function() {
     this.get('content').start();
   },
@@ -27,20 +15,28 @@ App.PomodoroController = Ember.Controller.extend({
 });
 
 Ember.TEMPLATES['pomodoro'] = Ember.Handlebars.compile([
-    'Time: {{view view.textView contentBinding=view.context}} / {{view.context.maxMin}} (min)',
+    'Time: {{view.timeLeftMin}} / {{view.maxMin}} (min)',
     '<button {{action start}}>Start</button>',
     '<button {{action stop}}>Stop</button>',
     '<button {{action reset}}>Reset</button>',
     '<br />',
-    'Current second {{view.context.passedTimeSec}}'
+    'Current second {{view.passedTimeSec}}'
   ].join(''))
 
 App.PomodoroView = Ember.View.extend({
   tagName: 'div',
 
-  textView: Ember.TextField.extend({
-    valueBinding: 'content.timeLeftMin'
-  }),
+  timeLeftMin: Ember.computed(function() {
+    return Math.floor(this.get('context.content.timeLeft') / 60 / 1000);
+  }).property('context.content.timeLeft'),
+
+  maxMin: Ember.computed(function() {
+    return Math.floor(this.get('context.content.max') / 60 / 1000);
+  }).property('context.content.max'),
+
+  passedTimeSec: Ember.computed(function() {
+    return Math.floor(this.get('context.content.passedTime') / 1000);
+  }).property('context.content.passedTime'),
 
 });
 
