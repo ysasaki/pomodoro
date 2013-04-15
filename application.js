@@ -1,6 +1,6 @@
 var App = window.App = Ember.Application.create();
 
-App.ExampleController = Ember.Controller.extend({
+App.PomodoroController = Ember.Controller.extend({
   timeLeftMin: Ember.computed(function() {
     return Math.floor(this.get('content.timeLeft') / 60 / 1000);
   }).property('content.timeLeft'),
@@ -26,7 +26,7 @@ App.ExampleController = Ember.Controller.extend({
   }
 });
 
-Ember.TEMPLATES['example'] = Ember.Handlebars.compile([
+Ember.TEMPLATES['pomodoro'] = Ember.Handlebars.compile([
     'Time: {{view view.textView contentBinding=view.context}} / {{view.context.maxMin}} (min)',
     '<button {{action start}}>Start</button>',
     '<button {{action stop}}>Stop</button>',
@@ -35,7 +35,7 @@ Ember.TEMPLATES['example'] = Ember.Handlebars.compile([
     'Current second {{view.context.passedTimeSec}}'
   ].join(''))
 
-App.ExampleView = Ember.View.extend({
+App.PomodoroView = Ember.View.extend({
   tagName: 'div',
 
   textView: Ember.TextField.extend({
@@ -44,7 +44,7 @@ App.ExampleView = Ember.View.extend({
 
 });
 
-var view = App.ExampleView.create({
+var view = App.PomodoroView.create({
 
 });
 
@@ -120,10 +120,10 @@ App.IndexRoute = Ember.Route.extend({
   },
 
   setupController: function(controller, model) {
-    this.controllerFor('example').set('content', model);
+    this.controllerFor('pomodoro').set('content', model);
   },
 
   renderTemplate: function() {
-    this.render('example');
+    this.render('pomodoro');
   }
 });
