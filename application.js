@@ -19,6 +19,10 @@ App.ExampleController = Ember.Controller.extend({
 
   stop: function() {
     this.get('content').stop();
+  },
+
+  reset: function() {
+    this.get('content').reset();
   }
 });
 
@@ -26,6 +30,7 @@ Ember.TEMPLATES['example'] = Ember.Handlebars.compile([
     'Time: {{view view.textView contentBinding=view.context}} / {{view.context.maxMin}} (min)',
     '<button {{action start}}>Start</button>',
     '<button {{action stop}}>Stop</button>',
+    '<button {{action reset}}>Reset</button>',
     '<br />',
     'Current second {{view.context.passedTimeSec}}'
   ].join(''))
@@ -85,9 +90,17 @@ App.Timer = Ember.Object.extend({
 
   stop: function() {
     var timerId = this.get('timerId');
-    clearInterval(timerId);
+    if (timerId) {
+      clearInterval(timerId);
+    }
 
     this.set('currentTime', Date.now());
+  },
+
+  reset: function() {
+    this.stop();
+    this.set('startTime',   null);
+    this.set('currentTime', null);
   },
 
   passedTime: Ember.computed(function() {
