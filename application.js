@@ -44,8 +44,6 @@ var view = App.PomodoroView.create({
 
 });
 
-// view.appendTo('body');
-
 Ember.Router.reopen({
   location: 'history'
 })
