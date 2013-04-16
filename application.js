@@ -1,17 +1,15 @@
 var App = window.App = Ember.Application.create();
 
+var proxyToContent = function(method) {
+  return function() {
+    this.get('content')[method]();
+  };
+};
+
 App.PomodoroController = Ember.Controller.extend({
-  start: function() {
-    this.get('content').start();
-  },
-
-  stop: function() {
-    this.get('content').stop();
-  },
-
-  reset: function() {
-    this.get('content').reset();
-  }
+  start: proxyToContent('start'),
+  stop:  proxyToContent('stop'),
+  reset: proxyToContent('reset')
 });
 
 Ember.TEMPLATES['pomodoro'] = Ember.Handlebars.compile([
