@@ -62,6 +62,10 @@ App.Timer = Ember.Object.extend({
   },
 
   start: function() {
+    if (this.get('timerId')) {
+      return
+    }
+
     var now = Date.now();
 
     if (Ember.isNone(this.get('currentTime'))) {
@@ -82,9 +86,12 @@ App.Timer = Ember.Object.extend({
 
   stop: function() {
     var timerId = this.get('timerId');
-    if (timerId) {
-      clearInterval(timerId);
+    if (!timerId) {
+      return
     }
+
+    clearInterval(timerId);
+    this.set('timerId', null);
 
     this.set('currentTime', Date.now());
   },
