@@ -38,14 +38,6 @@ App.PomodoroView = Ember.View.extend({
 
 });
 
-var view = App.PomodoroView.create({
-
-});
-
-Ember.Router.reopen({
-  location: 'history'
-})
-
 App.Timer = Ember.Object.extend({
   timerId: null,
   startTime: null,
