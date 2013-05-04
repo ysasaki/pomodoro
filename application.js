@@ -9,33 +9,32 @@ var proxyToContent = function(method) {
 App.PomodoroController = Ember.Controller.extend({
   start: proxyToContent('start'),
   stop:  proxyToContent('stop'),
-  reset: proxyToContent('reset')
+  reset: proxyToContent('reset'),
+
+  timeLeftMin: Ember.computed(function() {
+    return Math.floor(this.get('content.timeLeft') / 60 / 1000);
+  }).property('content.timeLeft'),
+
+  maxMin: Ember.computed(function() {
+    return Math.floor(this.get('content.max') / 60 / 1000);
+  }).property('content.max'),
+
+  passedTimeSec: Ember.computed(function() {
+    return Math.floor(this.get('content.passedTime') / 1000);
+  }).property('content.passedTime'),
 });
 
 Ember.TEMPLATES['pomodoro'] = Ember.Handlebars.compile([
-    'Time: {{view.timeLeftMin}} / {{view.maxMin}} (min)',
+    'Time: {{timeLeftMin}} / {{maxMin}} (min)',
     '<button {{action start}}>Start</button>',
     '<button {{action stop}}>Stop</button>',
     '<button {{action reset}}>Reset</button>',
     '<br />',
-    'Current second {{view.passedTimeSec}}'
+    'Current second {{passedTimeSec}}'
   ].join(''))
 
 App.PomodoroView = Ember.View.extend({
   tagName: 'div',
-
-  timeLeftMin: Ember.computed(function() {
-    return Math.floor(this.get('context.content.timeLeft') / 60 / 1000);
-  }).property('context.content.timeLeft'),
-
-  maxMin: Ember.computed(function() {
-    return Math.floor(this.get('context.content.max') / 60 / 1000);
-  }).property('context.content.max'),
-
-  passedTimeSec: Ember.computed(function() {
-    return Math.floor(this.get('context.content.passedTime') / 1000);
-  }).property('context.content.passedTime'),
-
 });
 
 App.Timer = Ember.Object.extend({
