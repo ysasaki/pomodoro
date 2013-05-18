@@ -54,14 +54,6 @@ App.Timer = Ember.Object.extend({
   passedTime: 0,
   max: 25 * 60 * 1000,
 
-  init: function(max) {
-    this._super();
-
-    if (!Ember.isNone(max)) {
-      this.set('max', max);
-    }
-  },
-
   start: function() {
     if (this.get('timerId')) {
       return
