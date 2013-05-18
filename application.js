@@ -95,6 +95,13 @@ App.Timer = Ember.Object.extend({
     this.set('currentTime', null);
   },
 
+  currentTimeDidChanged: Ember.observer(function() {
+    if (this.get('max') - this.get('passedTime') < 1000) {
+      this.stop();
+      // TODO Do some action to notify compete pomodoro.
+    }
+  }, 'currentTime'),
+
   passedTime: Ember.computed(function() {
     return this.get('currentTime') - this.get('startTime');
   }).property('startTime', 'currentTime'),
