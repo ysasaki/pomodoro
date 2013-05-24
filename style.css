@@ -32,7 +32,7 @@ header #title {
   -webkit-border-radius: 100px;
 }
 
-#time-left {
+#time-left-min {
   font-size: 50px;
   width: 60px;
   text-align: right;

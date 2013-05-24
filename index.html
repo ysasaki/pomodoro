@@ -4,10 +4,27 @@
     <title>Pomodoro</title>
     <link rel="stylesheet" href="./style.css">
     <script src="./vendor/jquery-1.9.1.js"></script>
-    <script src="./vendor/handlebars-1.0.0-rc.3.js"></script>
-    <script src="./vendor/ember-1.0.0-rc.3.js"></script>
+    <script src="./vendor/underscore-min.js"></script>
+    <script src="./vendor/underscore-fix.js"></script>
+    <script src="./vendor/Pasta.js"></script>
     <script src="./application.js"></script>
   </head>
   <body>
+    <header>
+      <div id="title">
+        <h1>Pomodoro</h1>
+      </div>
+    </header>
+    <div id="content">
+    <div id="timer">
+      <div id="time-left-min"></div>
+      <div id="time-left-sec"></div>
+    </div>
+    <span>
+      <button id="start">Start</button>
+      <button id="stop">Stop</button>
+      <button id="reset">Reset</button>
+    </span>
+    </div>
   </body>
 </html>

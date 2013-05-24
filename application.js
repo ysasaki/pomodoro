@@ -1,128 +1,112 @@
-var App = window.App = Ember.Application.create();
+$(function () {
+    var $timeLeftMin = $('#time-left-min'),
+        $timeLeftSec = $('#time-left-sec'),
+        MAX = 25 * 60 * 1000,
+        FPS = 1000 / 20;
 
-var proxyToContent = function(method) {
-  return function() {
-    this.get('content')[method]();
-  };
-};
+    function timeLeftMin(t) {
+        return Math.floor( t / 1000 / 60 );
+    };
 
-App.PomodoroController = Ember.Controller.extend({
-  start: proxyToContent('start'),
-  stop:  proxyToContent('stop'),
-  reset: proxyToContent('reset'),
+    function timeLeftSec(t) {
+        return Math.floor( t / 1000 ) % 60;
+    };
 
-  timeLeftMin: Ember.computed(function() {
-    return Math.floor(this.get('content.timeLeft') / 60 / 1000);
-  }).property('content.timeLeft'),
+    function tick() {
+        return setInterval(pasta_signal('tick'), FPS);
+    };
 
-  timeLeftSec: Ember.computed(function() {
-    return Math.floor(this.get('content.timeLeft') / 1000) % 60
-  }).property('content.timeLeft'),
-});
+    var Model = _.module(
+        {},
 
-Ember.TEMPLATES['application'] = Ember.Handlebars.compile([
-    '<header>',
-      '<div id="title">',
-        '<h1>Pomodoro</h1>',
-      '</div>',
-    '</header>',
-    '<div id="content">',
-      '{{outlet}}',
-    '</div>'
-  ].join(''));
+        function init(st) {
+            return { timeLeftMin: timeLeftMin(MAX), timeLeftSec: timeLeftSec(MAX) };
+        },
 
-Ember.TEMPLATES['pomodoro'] = Ember.Handlebars.compile([
-    '<div id="timer">',
-      '<div id="time-left">{{timeLeftMin}}</div>',
-      '<div id="time-left-sec">.{{timeLeftSec}}</div>',
-    '</div>',
-    '<span>',
-      '<button {{action start}}>Start</button>',
-      '<button {{action stop}}>Stop</button>',
-      '<button {{action reset}}>Reset</button>',
-    '</span>'
-  ].join(''))
+        function start(st) {
+            var now = Date.now();
+            if ( _.isNull(st.startTime) ) {
+                return {
+                    startTime: now,
+                    timerId: tick()
+                };
+            }
+            else {
+                var diff = now - st.currentTime;
+                return {
+                    startTime: st.startTime + diff,
+                    timerId: tick()
+                };
+            }
+        },
 
-App.PomodoroView = Ember.View.extend({
-  tagName: 'div',
-});
+        function stop(st) {
+            clearInterval(st.timerId);
+            return { timerId: null };
+        },
 
-App.Timer = Ember.Object.extend({
-  timerId: null,
-  startTime: null,
-  currentTime: null,
-  passedTime: 0,
-  max: 25 * 60 * 1000,
+        function reset(st) {
+            pasta_signal('stop')();
+            return {
+                timeLeftMin: timeLeftMin(MAX),
+                timeLeftSec: timeLeftSec(MAX),
+                startTime: null,
+                currentTime: null
+            };
+        },
 
-  start: function() {
-    if (this.get('timerId')) {
-      return
-    }
+        function tick(st) {
+            var currentTime = Date.now();
+            if ( currentTime - st.startTime > MAX ) {
+                pasta_signal('stop')();
+                return { startTime: null, currentTime: null };
+            }
+            else {
+                var left = MAX - (currentTime - st.startTime);
+                return {
+                    currentTime: currentTime,
+                    timeLeftMin: timeLeftMin(left),
+                    timeLeftSec: timeLeftSec(left)
+                };
+            }
+        }
+    );
 
-    var now = Date.now();
+    var UI = _.module(
+        {},
+        function updateTimeLeftMin(n) {
+            $timeLeftMin.text(n);
+        },
+        function updateTimeLeftSec(n) {
+            $timeLeftSec.text("." + n);
+        }
+    );
 
-    if (Ember.isNone(this.get('currentTime'))) {
-      this.set('startTime',   now);
-      this.set('currentTime', now);
-    } else {
-      var diff = now - this.get('currentTime');
-      this.set('startTime',   this.get('startTime') + diff);
-      this.set('currentTime', now);
-    }
+    var View = _.module(
+        {},
+        function timeLeftMin(UI,st) {
+            UI.updateTimeLeftMin(st.timeLeftMin);
+        },
+        function timeLeftSec(UI,st) {
+            UI.updateTimeLeftSec(st.timeLeftSec);
+        }
+    );
 
-    var timerId = setInterval(function() {
-      this.set('currentTime', Date.now());
-    }.bind(this), 20);
+    var initial_state = {
+        // for view
+        timeLeftMin: null,
+        timeLeftSec: null,
 
-    this.set('timerId', timerId);
-  },
+        // for model
+        startTime: null,
+        currentTime: null,
+        timerId: null,
+    };
 
-  stop: function() {
-    var timerId = this.get('timerId');
-    if (!timerId) {
-      return
-    }
+    var pasta_signal = Pasta(Model, UI, View, initial_state);
+    pasta_signal('init')();
 
-    clearInterval(timerId);
-    this.set('timerId', null);
-
-    this.set('currentTime', Date.now());
-  },
-
-  reset: function() {
-    this.stop();
-    this.set('startTime',   null);
-    this.set('currentTime', null);
-  },
-
-  currentTimeDidChanged: Ember.observer(function() {
-    if (this.get('max') - this.get('passedTime') < 1000) {
-      this.stop();
-      // TODO Do some action to notify compete pomodoro.
-    }
-  }, 'currentTime'),
-
-  passedTime: Ember.computed(function() {
-    return this.get('currentTime') - this.get('startTime');
-  }).property('startTime', 'currentTime'),
-
-  timeLeft: Ember.computed(function() {
-    return this.get('max') - (this.get('currentTime') - this.get('startTime'));
-  }).property('max', 'currentTime', 'startTime')
-});
-
-App.currentTimer = App.Timer.create();
-
-App.IndexRoute = Ember.Route.extend({
-  model: function() {
-    return App.currentTimer;
-  },
-
-  setupController: function(controller, model) {
-    this.controllerFor('pomodoro').set('content', model);
-  },
-
-  renderTemplate: function() {
-    this.render('pomodoro');
-  }
+    $('#start').on('click', pasta_signal('start'));
+    $('#stop').on('click', pasta_signal('stop'));
+    $('#reset').on('click', pasta_signal('reset'));
 });
